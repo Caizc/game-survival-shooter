@@ -1,87 +1,81 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using UnityEngine.SceneManagement;
-
 
 public class PlayerHealth : MonoBehaviour
 {
-    public int startingHealth = 100;
-    public int currentHealth;
-    public Slider healthSlider;
-    public Image damageImage;
-    public AudioClip deathClip;
-    public float flashSpeed = 5f;
-    public Color flashColour = new Color(1f, 0f, 0f, 0.1f);
+    [SerializeField]
+    public int currentHealth { get; private set; }
+    [SerializeField]
+    private int startingHealth = 100;
+    [SerializeField]
+    private Slider healthSlider;
+    [SerializeField]
+    private Image damageImage;
+    [SerializeField]
+    private float flashSpeed = 5f;
+    [SerializeField]
+    private Color flashColour = new Color(1f, 0f, 0f, 0.3f);
+    [SerializeField]
+    private AudioClip deathClip;
 
+    private Animator _playerAnimator;
+    private AudioSource _playerAudioSource;
+    private PlayerMovement _playerMovement;
+    private PlayerShooting _playerShooting;
+    private bool _isDead;
+    private bool _isDamaged;
 
-    Animator anim;
-    AudioSource playerAudio;
-    PlayerMovement playerMovement;
-    //PlayerShooting playerShooting;
-    bool isDead;
-    bool damaged;
-
-
-    void Awake ()
+    void Awake()
     {
-        anim = GetComponent <Animator> ();
-        playerAudio = GetComponent <AudioSource> ();
-        playerMovement = GetComponent <PlayerMovement> ();
-        //playerShooting = GetComponentInChildren <PlayerShooting> ();
+        _playerAnimator = GetComponent<Animator>();
+        _playerAudioSource = GetComponent<AudioSource>();
+        _playerMovement = GetComponent<PlayerMovement>();
+        _playerShooting = GetComponentInChildren<PlayerShooting>();
+
         currentHealth = startingHealth;
     }
 
-
-    void Update ()
+    void Update()
     {
-        if(damaged)
+        if (_isDamaged)
         {
             damageImage.color = flashColour;
         }
         else
         {
-            damageImage.color = Color.Lerp (damageImage.color, Color.clear, flashSpeed * Time.deltaTime);
+            damageImage.color = Color.Lerp(damageImage.color, Color.clear, Time.deltaTime * flashSpeed);
         }
-        damaged = false;
+
+        _isDamaged = false;
     }
 
-
-    public void TakeDamage (int amount)
+    public void TakeDamage(int amount)
     {
-        damaged = true;
+        _isDamaged = true;
 
         currentHealth -= amount;
 
         healthSlider.value = currentHealth;
+        _playerAudioSource.Play();
 
-        playerAudio.Play ();
-
-        if(currentHealth <= 0 && !isDead)
+        if (currentHealth <= 0 && !_isDead)
         {
-            Death ();
+            Death();
         }
     }
 
-
-    void Death ()
+    private void Death()
     {
-        isDead = true;
+        _isDead = true;
 
-        //playerShooting.DisableEffects ();
+        _playerShooting.DisableEffects();
 
-        anim.SetTrigger ("Die");
+        _playerAnimator.SetTrigger("Die");
 
-        playerAudio.clip = deathClip;
-        playerAudio.Play ();
+        _playerAudioSource.clip = deathClip;
+        _playerAudioSource.Play();
 
-        playerMovement.enabled = false;
-        //playerShooting.enabled = false;
-    }
-
-
-    public void RestartLevel ()
-    {
-        SceneManager.LoadScene (0);
+        _playerMovement.enabled = false;
+        _playerShooting.enabled = false;
     }
 }

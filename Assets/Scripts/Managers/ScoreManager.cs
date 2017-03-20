@@ -1,24 +1,20 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class ScoreManager : MonoBehaviour
 {
+    [SerializeField]
+    private Text scoreText;
+
     public static int score;
 
-
-    Text text;
-
-
-    void Awake ()
+    void Awake()
     {
-        text = GetComponent <Text> ();
         score = 0;
     }
 
-
-    void Update ()
+    void Update()
     {
-        text.text = "Score: " + score;
+        scoreText.text = "Score: " + score;
     }
 }
